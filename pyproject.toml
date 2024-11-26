@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "customagentandtool"
+version = "1"
+description = "This is a custom tool agent and tool project"
+authors = ["murtaza2921 <murtaza7571@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10.0,<3.12"
+langchain-openai = "^0.1.8"
+python-dotenv = "^1.0.1"
+langchain = "^0.2.1"
+langchain-community = "^0.2.1"
+langchain-anthropic = "^0.1.15"
+langchain-google-genai = "^1.0.5"
+langchain-google-firestore = "^0.3.0"
+firestore = "^0.0.8"
+chromadb = "^0.5.0"
+tiktoken = "^0.7.0"
+sentence-transformers = "^3.0.0"
+bs4 = "^0.0.2"
+firecrawl-py = "^0.0.13"
+langchainhub = "^0.1.18"
+wikipedia = "^1.4.0"
+tavily-python = "^0.3.3"
+python-docx = "^1.1.2"
+python-multipart = "^0.0.17"
+streamlit = "^1.40.2"
+pypdf = "^5.1.0"
+flask = "^3.1.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

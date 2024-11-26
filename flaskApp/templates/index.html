@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Cool Chatbot</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Chat section */
+        .chat-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            justify-content: flex-end;
+            overflow-y: auto;
+            background-color: #fafafa;
+        }
+
+        .scrollable {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .user-bubble {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            align-self: flex-end;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .bot-bubble {
+            background-color: #f1f1f1;
+            color: #333;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            align-self: flex-start;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .upload-container input[type="file"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 15px;
+            width: 60%;
+        }
+
+        .upload-btn {
+            padding: 12px 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Input Section */
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        .input-container input {
+            width: 80%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-container input:focus {
+            border-color: #007bff;
+        }
+
+        .input-container button {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .input-container button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Loader Styles */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light gray */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+            display: block;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-message {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 20px 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">🤖 Super Cool Chatbot</div>
+
+        <!-- Upload section -->
+        <div class="upload-container">
+            <input type="file" id="file-upload" accept=".pdf, .docx, .csv" />
+            <button class="upload-btn" onclick="uploadFile()">Upload</button>
+        </div>
+
+        <!-- Chat section -->
+        <div id="chat" class="chat-container scrollable"></div>
+
+        <!-- Input Section -->
+        <div class="input-container">
+            <input type="text" id="user-query" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let chat = document.getElementById('chat');
+        let userQueryInput = document.getElementById('user-query');
+
+        // Append messages to chat
+        function appendMessage(content, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add(role === 'user' ? 'user-bubble' : 'bot-bubble');
+            messageDiv.innerText = content;
+            chat.appendChild(messageDiv);
+            chat.scrollTop = chat.scrollHeight;  // Scroll to the bottom
+        }
+
+        // Show loader while waiting for bot response
+        function showLoading() {
+            const loaderDiv = document.createElement('div');
+            loaderDiv.classList.add('loading-message');
+            loaderDiv.innerHTML = 'Thinking... <div class="loader"></div>';
+            chat.appendChild(loaderDiv);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Hide loader when bot response is ready
+        function hideLoading() {
+            const loader = document.querySelector('.loading-message');
+            if (loader) loader.remove();
+        }
+
+        // Handle sending a message
+        async function sendMessage() {
+            const userQuery = userQueryInput.value.trim();
+            if (userQuery) {
+                appendMessage(userQuery, 'user');
+                userQueryInput.value = '';
+                showLoading();  // Show loader while bot is processing
+
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: userQuery })
+                });
+                const data = await response.json();
+                hideLoading();  // Hide loader when bot response is received
+
+                appendMessage(data.response, 'bot');
+            }
+        }
+
+        // Handle file upload
+        async function uploadFile() {
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const loaderDiv = document.createElement('div');
+            loaderDiv.classList.add('loading-message');
+            loaderDiv.innerHTML = 'Uploading... <div class="loader"></div>';
+            chat.appendChild(loaderDiv);
+            chat.scrollTop = chat.scrollHeight;
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            hideLoading();  // Hide the loader after upload completes
+            alert(data.message);  // Show success or error message
+        }
+    </script>
+</body>
+</html>
