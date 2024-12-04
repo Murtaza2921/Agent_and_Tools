@@ -9,15 +9,31 @@ from langchain_core.tools import StructuredTool, Tool
 from langchain_openai import ChatOpenAI
 from tools.rag_tool import add_file_to_knowledge_base, query_knowledge_base
 from dotenv import load_dotenv
-
+from tools.api_tool import APITool
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 # FastAPI app
 app = FastAPI(debug=True)
 
+# Initialize API Tool
+api_tool = APITool(base_url="http://127.0.0.1:9000")
+
 # Initialize the language model
 llm = ChatOpenAI(model="gpt-3.5-turbo")
+
+
+# Tool function for API calls
+def api_tool_function(input_data: dict):
+    """Wrapper function for the API Tool."""
+    if not api_tool.token:
+        # Perform login first if the token is not set
+        login_success = api_tool.login(email="murtaza@gmail.com", password="password123")
+        if not login_success:
+            return {"error": "Login failed, unable to generate token."}
+    return api_tool.call_api(endpoint=input_data.get("endpoint"), method=input_data.get("method", "GET"), data=input_data.get("data"))
+
+
 
 # Agent tools
 tools = [
@@ -25,6 +41,11 @@ tools = [
         name="QueryKnowledgeBase",
         func=query_knowledge_base,
         description="Query the knowledge base to retrieve answers.",
+    ),
+     Tool(
+        name="APITool",
+        func=api_tool_function,
+        description="Call APIs using a generated JWT token.",
     ),
 ]
 

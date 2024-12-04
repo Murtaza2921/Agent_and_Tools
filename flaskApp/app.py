@@ -51,6 +51,7 @@ def chat():
                 "http://127.0.0.1:8000/chat",
                 json={"query": user_query}
             )
+            print('api response :', response)
             bot_reply = response.json().get("response", "Sorry, something went wrong!")
             return jsonify({"response": bot_reply}), 200
         except Exception as e:
